@@ -1,98 +1,93 @@
--- lua/nvim-dap-projects/core.lua
 local config_module = require("nvim-dap-projects.config")
-local logger = require("nvim-dap-projects.log")
-
+local logger = config_module.logger() -- Assumes this returns the new logger instance
 local M = {}
 
 --- Searches for and applies a project-local DAP configuration.
-function M.search_project_config() --
+function M.search_project_config()
     local current_config = config_module.get()
-    logger.log(vim.log.levels.DEBUG, "Starting search for project DAP configuration.") --
+    -- This first log message was already in the new style in your provided snippet
+    logger:debug("Beginning search for project DAP configuration.") -- Corrected spelling
 
-    local dap_ok, dap = pcall(require, "dap") --
+    local dap_ok, dap = pcall(require, "dap")
     if not dap_ok then
-        logger.log(vim.log.levels.ERROR, "nvim-dap could not be required. Ensure it is loaded.") --
+        logger:error("nvim-dap could not be required. Ensure it is loaded.") -- Changed
         return
     end
 
     local project_config_filepath = ""
-    for _, path_pattern in ipairs(current_config.config_paths) do --
-        logger.log(vim.log.levels.TRACE, "Checking path: %s", path_pattern) --
-        local stat = vim.loop.fs_stat(path_pattern) --
-        if stat and stat.type == "file" then --
-            project_config_filepath = path_pattern --
-            logger.log(vim.log.levels.DEBUG, "Found project config file at: %s", project_config_filepath) --
+    for _, path_pattern in ipairs(current_config.config_paths) do
+        logger:trace("Checking path:", path_pattern) -- Changed
+        local stat = vim.loop.fs_stat(path_pattern)
+        if stat and stat.type == "file" then
+            project_config_filepath = path_pattern
+            logger:debug("Found project config file at:", project_config_filepath) -- Changed
             break
         end
     end
 
     if project_config_filepath == "" then
-        logger.log(vim.log.levels.INFO, "No project-specific DAP configuration file found in search paths.") --
+        logger:info("No project-specific DAP configuration file found in search paths.") -- Changed
         return
     end
 
-    logger.log(vim.log.levels.INFO, "Loading project DAP configuration from: %s", project_config_filepath) --
+    logger:info("Loading project DAP configuration from:", project_config_filepath) -- Changed
 
-    local loaded_ok, project_dap_settings = pcall(dofile, project_config_filepath) --
+    local loaded_ok, project_dap_settings = pcall(dofile, project_config_filepath)
 
-    if not loaded_ok or type(project_dap_settings) ~= "table" then --
-        logger.log(
-            vim.log.levels.ERROR,
-            "Failed to load or parse project DAP configuration from %s. Error: %s",
+    if not loaded_ok or type(project_dap_settings) ~= "table" then
+        logger:error( -- Changed
+            "Failed to load or parse project DAP configuration from:",
             project_config_filepath,
-            tostring(project_dap_settings)
-        ) --
+            "Error:",
+            project_dap_settings -- The logger will use vim.inspect() on this
+        )
         return
     end
 
-    logger.log(vim.log.levels.DEBUG, "Project DAP settings loaded successfully from file.") --
+    logger:debug("Project DAP settings loaded successfully from file.") -- Changed
 
     -- Apply adapters
-    if project_dap_settings.adapters and type(project_dap_settings.adapters) == "table" then --
-        if current_config.merge_configs then --
-            logger.log(vim.log.levels.DEBUG, "Merging project DAP adapters into global adapters.") --
-            dap.adapters = vim.tbl_deep_extend("force", dap.adapters or {}, project_dap_settings.adapters) --
+    if project_dap_settings.adapters and type(project_dap_settings.adapters) == "table" then
+        if current_config.merge_configs then
+            logger:debug("Merging project DAP adapters into global adapters.") -- Changed
+            dap.adapters = vim.tbl_deep_extend("force", dap.adapters or {}, project_dap_settings.adapters)
         else
-            logger.log(vim.log.levels.DEBUG, "Overwriting global DAP adapters with project adapters.") --
-            dap.adapters = project_dap_settings.adapters --
+            logger:debug("Overwriting global DAP adapters with project adapters.") -- Changed
+            dap.adapters = project_dap_settings.adapters
         end
-    elseif not current_config.merge_configs then --
-        logger.log(vim.log.levels.DEBUG, "Overwrite mode: No adapters in project config; clearing global DAP adapters.") --
-        dap.adapters = {} --
+    elseif not current_config.merge_configs then
+        logger:debug("Overwrite mode: No adapters in project config; clearing global DAP adapters.") -- Changed
+        dap.adapters = {}
     end
 
     -- Apply configurations
-    if project_dap_settings.configurations and type(project_dap_settings.configurations) == "table" then --
-        if current_config.merge_configs then --
-            logger.log(vim.log.levels.DEBUG, "Merging project DAP configurations into global configurations.") --
-            for lang, project_lang_configs in pairs(project_dap_settings.configurations) do --
-                if type(project_lang_configs) == "table" then --
-                    if dap.configurations[lang] == nil or type(dap.configurations[lang]) ~= "table" then --
-                        dap.configurations[lang] = {} --
+    if project_dap_settings.configurations and type(project_dap_settings.configurations) == "table" then
+        if current_config.merge_configs then
+            logger:debug("Merging project DAP configurations into global configurations.") -- Changed
+            for lang, project_lang_configs in pairs(project_dap_settings.configurations) do
+                if type(project_lang_configs) == "table" then
+                    if dap.configurations[lang] == nil or type(dap.configurations[lang]) ~= "table" then
+                        dap.configurations[lang] = {}
                     end
-                    for _, p_conf in ipairs(project_lang_configs) do --
-                        table.insert(dap.configurations[lang], p_conf) --
+                    for _, p_conf in ipairs(project_lang_configs) do
+                        table.insert(dap.configurations[lang], p_conf)
                     end
-                    logger.log(vim.log.levels.TRACE, "Merged configurations for language '%s'.", lang) --
+                    logger:trace("Merged configurations for language:", lang) -- Changed
                 end
             end
         else
-            logger.log(vim.log.levels.DEBUG, "Overwriting global DAP configurations with project configurations.") --
-            dap.configurations = project_dap_settings.configurations --
+            logger:debug("Overwriting global DAP configurations with project configurations.") -- Changed
+            dap.configurations = project_dap_settings.configurations
         end
-    elseif not current_config.merge_configs then --
-        logger.log(
-            vim.log.levels.DEBUG,
-            "Overwrite mode: No configurations in project config; clearing global DAP configurations."
-        ) --
-        dap.configurations = {} --
+    elseif not current_config.merge_configs then
+        logger:debug("Overwrite mode: No configurations in project config; clearing global DAP configurations.") -- Changed
+        dap.configurations = {}
     end
 
-    logger.log(
-        vim.log.levels.INFO,
-        "DAP settings updated from project configuration. Merge mode: %s",
-        tostring(current_config.merge_configs)
-    ) --
+    logger:info( -- Changed
+        "DAP settings updated from project configuration. Merge mode:",
+        current_config.merge_configs -- The logger will use vim.inspect() on this
+    )
 end
 
 return M
