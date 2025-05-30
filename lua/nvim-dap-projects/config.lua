@@ -30,7 +30,7 @@ function M.setup(user_opts)
     -- This call was originally in M.setup in the single file version
     logger.log(
         vim.log.levels.INFO,
-        "Configuration updated. Merge mode: %s. Log level: %s. Log file: %s",
+        "Configuration updated. Merge mode: %s. Log file: %s",
         tostring(active_config.merge_configs),
         active_config.log_file or "none"
     )
