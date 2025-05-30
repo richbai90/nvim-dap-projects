@@ -36,7 +36,7 @@ function M.log(level, ...)
         local f = io.open(current_config.log_file, "a") --
         if f then
             f:write(
-                string.format("%s [%s] %s\n", os.date("%Y-%m-%d %H:%M:%S"), vim.log.level_str(msg_level):upper(), msg) --
+                string.format("%s %s\n", os.date("%Y-%m-%d %H:%M:%S"),  msg) --
             )
             f:close() --
         elseif do_notify then
