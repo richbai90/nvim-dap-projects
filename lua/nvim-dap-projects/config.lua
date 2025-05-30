@@ -8,7 +8,6 @@ local defaults = {
     config_paths = { "./.nvim/nvim-dap.lua", "./.nvim-dap/nvim-dap.lua", "./.nvim-dap.lua" }, --
     merge_configs = false, --
     log_level = 'INFO',
-    log_file = nil, --
 }
 
 local active_config = vim.deepcopy(defaults)
@@ -18,7 +17,7 @@ local active_config = vim.deepcopy(defaults)
 function M.setup(user_opts)
     user_opts = user_opts or {}
     active_config = vim.tbl_deep_extend("force", vim.deepcopy(defaults), user_opts) --
-    logger = logger_module.create_logger(active_config.log_file)
+    logger = logger_module.create_logger('nvim-dap-projects.log')
     logger:set_level(active_config.log_level)
     
     -- Validate and normalize log_level

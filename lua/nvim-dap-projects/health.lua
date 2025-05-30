@@ -28,7 +28,6 @@ function Health.check()
     else
          vim.health.info(("- Log level: (Could not determine string representation or log_level not set)"))
     end
-    vim.health.info(("- Log file: %s"):format(current_config.log_file or "Not set")) --
     vim.health.info(("- Config search paths: %s"):format(table.concat(current_config.config_paths, ", "))) --
 
     local cwd = vim.fn.getcwd() --
