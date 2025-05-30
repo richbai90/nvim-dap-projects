@@ -78,14 +78,6 @@ function M.setup(user_opts)
 	if type(config.log_level) ~= "number" then -- Final fallback
 		config.log_level = defaults.log_level
 	end
-
-	log(
-		vim.log.levels.INFO,
-		"Configuration updated. Merge mode: %s. Log level: %s. Log file: %s",
-		tostring(config.merge_configs),
-		vim.log.level_str(config.log_level):upper(),
-		config.log_file or "none"
-	)
 end
 
 --- Searches for and applies a project-local DAP configuration.
