@@ -29,7 +29,7 @@ function M.log(level, ...)
     local msg = string.format(...) --
 
     if do_notify then
-        vim.notify(("[nvim-dap-projects] [%s] %s"):format(vim.log.level_str(msg_level):upper(), msg), msg_level) --
+        vim.notify(("[nvim-dap-projects] %s"):format(msg), msg_level) --
     end
 
     if do_log_to_file then --
