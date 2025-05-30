@@ -245,9 +245,6 @@ function M.healthcheck()
 	end
 end
 
--- Optional: Register healthcheck if you want to use :checkhealth
--- This part would typically go in your plugin's main init.lua or ftplugin if it were a full plugin.
--- For a single file module, you might need to call this registration from your main Neovim config.
--- vim.health.provider.register("nvim-dap-projects", { get = function() M.healthcheck() end })
+vim.health.provider.register("nvim-dap-projects", { get = function() M.healthcheck() end })
 
 return M
