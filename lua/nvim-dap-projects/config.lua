@@ -32,7 +32,6 @@ function M.setup(user_opts)
         vim.log.levels.INFO,
         "Configuration updated. Merge mode: %s. Log level: %s. Log file: %s",
         tostring(active_config.merge_configs),
-        vim.log.level_str(active_config.log_level):upper(),
         active_config.log_file or "none"
     )
 end
